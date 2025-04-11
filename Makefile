@@ -6,7 +6,7 @@ CFLAGS=-Wall -Wextra -Werror -fsanitize=address -g
 
 #Files
 
-FILES= $(SRC_DIR)/philosophers.c \
+FILES= $(SRC_DIR)/philosophers.c $(SRC_DIR)/philo_utils.c\
 
 OBJS=$(FILES:.c=.o)
 
@@ -22,7 +22,7 @@ NAME=philo
 
 CYAN = \033[1;36m
 GREEN = \033[1;32m
-RED = \031[1;31m
+RED = \033[1;31m
 RESET = \033[0m
 BOX_TOP = /===============\\
 BOX_MID = |
@@ -32,9 +32,9 @@ BOX_BOT = \\===============/
 #Compilation
 
 $(NAME): $(OBJS)
-	@echo "$(RED)Making ??? ...$(RESET)"
+	@echo "$(RED)Making Philo ...$(RESET)"
 	@gcc $(CFLAGS) -o $(NAME) $(OBJS)
-	@echo "$(GREEN)??? Done Succesfully !$(RESET)"
+	@echo "$(GREEN)Philo Done Succesfully !$(RESET)"
 
 %.o: %.c
 	@gcc $(CFLAGS) -I includes -c $< -o $@
