@@ -12,7 +12,7 @@
 
 #include "../includes/philosophers.h"
 
-int	print_msg(t_philo_data *data, char *msg, int dead)
+int	message(t_philo_data *data, char *msg, int dead)
 {
 	pthread_mutex_lock(&data->print);
 	pthread_mutex_lock(&data->m_stop);
@@ -26,7 +26,7 @@ int	print_msg(t_philo_data *data, char *msg, int dead)
 	printf(msg, get_time() - data->start, data->id + 1);
 	if (dead)
 	{
-		update_death(data);
+		death(data);
 		pthread_mutex_unlock(&data->print);
 		return (1);
 	}
@@ -34,26 +34,26 @@ int	print_msg(t_philo_data *data, char *msg, int dead)
 	return (0);
 }
 
-int	choose_fork(t_philo_data *data)
+int	fork_choice(t_philo_data *data)
 {
 	if (pthread_mutex_lock(data->fork_right) != 0)
 		return (1);
-	print_msg(data, MSG_FORK, 0);
+	message(data, FORK, 0);
 	if (data->fork_left == data->fork_right
 		|| pthread_mutex_lock(data->fork_left) != 0)
 	{
 		pthread_mutex_unlock(data->fork_right);
 		return (1);
 	}
-	print_msg(data, MSG_FORK, 0);
+	message(data, FORK, 0);
 	return (0);
 }
 
-int	my_fork(t_philo_data *data)
+int	forks(t_philo_data *data)
 {
-	if (choose_fork(data))
+	if (fork_choice(data))
 		return (1);
-	print_msg(data, MSG_EAT, 0);
+	message(data, EAT, 0);
 	pthread_mutex_lock(&data->m_last_eat);
 	data->last_eat = get_time();
 	pthread_mutex_unlock(&data->m_last_eat);
@@ -66,4 +66,23 @@ int	my_fork(t_philo_data *data)
 	pthread_mutex_unlock(data->fork_left);
 	pthread_mutex_unlock(data->fork_right);
 	return (0);
+}
+
+void	philo_free(t_philo_data *data)
+{
+	int	i;
+
+	i = 0;
+	while (i < data->number_of_philo && data->forks)
+	{
+		pthread_mutex_destroy(&data->forks[i]);
+		pthread_mutex_destroy(&data->m_eat_count);
+		pthread_mutex_destroy(&data->m_last_eat);
+		pthread_mutex_destroy(&data->m_stop);
+		i++;
+	}
+	i = 0;
+	free(data->forks);
+	free(data->philo);
+	pthread_mutex_destroy(&data->print);
 }

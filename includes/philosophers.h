@@ -26,11 +26,11 @@
 
 //define
 
-# define MSG_FORK "%lld %d has taken a fork\n"
-# define MSG_EAT "%lld %d is eating\n"
-# define MSG_SLEEP "%lld %d is sleeping\n"
-# define MSG_THINK "%lld %d is thinking\n"
-# define MSG_DEAD "%lld %d died\n"
+# define FORK "AT %lld PHILOSOPHER %d TOOK A FORK\n"
+# define EAT "AT %lld PHILOSOPHER %d IS EATING\n"
+# define SLEEP "AT %lld PHILOSOPHER %d IS SLEEPING\n"
+# define THINK "AT %lld PHILOSOPHER %d IS THINKING\n"
+# define DEAD "AT %lld PHILOSOPHER %d DIED\n"
 
 //struct
 
@@ -44,7 +44,11 @@ typedef struct s_philo_data
 	int					i;
 	int					stop;
 	int* 				id;
+	int					must_eat;
+	int					eat_count;
 	pthread_t* 			philo;
+	pthread_t 			checker;
+	pthread_t 			dead_checker;
 	pthread_mutex_t*	forks;
 	pthread_mutex_t		m_number_of_times;
 	pthread_mutex_t		m_stop;
@@ -62,9 +66,15 @@ typedef struct s_philo_data
 int			ft_atoi(const char *str);
 int			check_args(char **argv);
 int			ft_usleep(long long time, t_philo_data *data);
-int			my_fork(t_philo_data *data);
-int			print_msg(t_philo_data *data, char *msg, int dead);
-void		*update_death(t_philo_data *data);
+int			forks(t_philo_data *data);
+int			message(t_philo_data *data, char *msg, int dead);
+int			init_checker_thread(t_philo_data *data);
+void		*death(t_philo_data *data);
+void		philo_free(t_philo_data *data);
+void		init_philo(int argc, char **argv, t_philo_data *data);
+void* 		check_thread(void* argv);
+void*		check_dead(void* argv);
+void* 		thread_function(void* argv);
 long long	get_time(void);
 
 #endif

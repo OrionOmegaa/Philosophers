@@ -69,7 +69,7 @@ long long	get_time(void)
 	return ((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
 }
 
-void	*update_death(t_philo_data *data)
+void	*death(t_philo_data *data)
 {
 	int	i;
 
@@ -103,7 +103,7 @@ int	ft_usleep(long long time, t_philo_data *data)
 		if (tmp - data->last_eat - data->time_to_die > 0)
 		{
 			pthread_mutex_unlock(&data->m_last_eat);
-			print_msg(data, MSG_DEAD, 1);
+			message(data, DEAD, 1);
 			return (1);
 		}
 		pthread_mutex_unlock(&data->m_last_eat);
