@@ -6,7 +6,7 @@ CFLAGS=-Wall -Wextra -Werror -fsanitize=address -g
 
 #Files
 
-FILES= $(SRC_DIR)/philosophers.c $(SRC_DIR)/philo_utils.c\
+FILES= $(SRC_DIR)/philosophers.c $(SRC_DIR)/philo_utils.c $(SRC_DIR)/philo_utils2.c\
 
 OBJS=$(FILES:.c=.o)
 

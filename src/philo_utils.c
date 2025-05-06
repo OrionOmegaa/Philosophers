@@ -44,19 +44,75 @@ int	check_args(char **argv)
 	int	i;
 	int	j;
 
-	j = 0;
+	j = 1;
 	while (argv[j] != NULL)
 	{
 		i = 0;
-		/*if (argv[j][i] == '\0')
-			return (1);*/
+		if (argv[j][i] == '\0')
+			return (1);
 		while (argv[j][i] != '\0')
 		{
-			if (argv[j][i] >= '9' || argv[j][i] <= '0')
+			if (argv[j][i] > '9' || argv[j][i] < '0')
 				return (1);
 			i++;
 		}
 		j++;
+	}
+	return (0);
+}
+
+long long	get_time(void)
+{
+	struct timeval	tv;
+
+	gettimeofday(&tv, NULL);
+	return ((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
+}
+
+void	*update_death(t_philo_data *data)
+{
+	int	i;
+
+	i = -1;
+	pthread_mutex_lock(&data->m_stop);
+	if (&data->m_stop)
+	{
+		pthread_mutex_unlock(&data->m_stop);
+		return (NULL);
+	}
+	pthread_mutex_unlock(&data->m_stop);
+	while (++i < data->number_of_philo)
+	{
+		pthread_mutex_lock(&data->m_stop);
+		data->stop = 1;
+		pthread_mutex_unlock(&data->m_stop);
+	}
+	return (NULL);
+}
+
+int	ft_usleep(long long time, t_philo_data *data)
+{
+	long long	wait;
+	long long	tmp;
+
+	wait = get_time() + time;
+	tmp = get_time();
+	while (tmp < wait)
+	{
+		pthread_mutex_lock(&data->m_last_eat);
+		if (tmp - data->last_eat - data->time_to_die > 0)
+		{
+			pthread_mutex_unlock(&data->m_last_eat);
+			print_msg(data, MSG_DEAD, 1);
+			return (1);
+		}
+		pthread_mutex_unlock(&data->m_last_eat);
+		pthread_mutex_lock(&data->m_stop);
+		if (data->stop)
+			return (pthread_mutex_unlock(&data->m_stop) + 1);
+		pthread_mutex_unlock(&data->m_stop);
+		usleep(1000);
+		tmp = get_time();
 	}
 	return (0);
 }
