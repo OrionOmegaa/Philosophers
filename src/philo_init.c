@@ -12,33 +12,31 @@
 
 #include "../includes/philosophers.h"
 
-void	init_fork(t_philo_data *data)
+void init_fork(t_philo_data *data)
 {
-	data->i = 0;
-	data->forks = malloc(sizeof(pthread_mutex_t) * data->number_of_philo);
-	if (!data->forks)
-		perror("Malloc Error");
-	while (data->i >= data->number_of_philo)
-	{
-		if (pthread_mutex_init(&data->forks[data->i], NULL) != 0)
-			perror("pthread_mutex_init");
-		data->i++;
-	}
-	data->i = 0;
-	if (data->i % 2 == 0)
-	{
-		data->fork_left = &data->forks[(data->i + 1) % data->number_of_philo];
-		data->fork_right = &data->forks[data->i];
-	}
-	else
-	{
-		data->fork_left = &data->forks[data->i];
-		data->fork_right = &data->forks[(data->i + 1) % data->number_of_philo];
-	}
+	int	i;
+
+    i = 0;
+    while (i < data->number_of_philo)
+    {
+        if (data->i % 2 == 0)
+        {
+            data->philo[i].fork_left = &data->forks[(i + 1) % data->number_of_philo];
+            data->philo[i].fork_right = &data->forks[i];
+        }
+        else
+        {
+            data->philo[i].fork_left = &data->forks[i];
+            data->philo[i].fork_right = &data->forks[(i + 1) % data->number_of_philo];
+        }
+        i++;
+    }
 }
 
 void	init_philo(int argc, char **argv, t_philo_data *data)
 {
+	int	i;
+
 	data->number_of_philo = ft_atoi(argv[1]);
 	data->time_to_die = ft_atoi(argv[2]);
 	data->time_to_eat = ft_atoi(argv[3]);
@@ -47,20 +45,27 @@ void	init_philo(int argc, char **argv, t_philo_data *data)
 		data->number_of_times = ft_atoi(argv[5]);
 	else
 		data->number_of_times = -1;
-	init_fork(data);
-	data->i = 0;
-	data->philo = malloc(sizeof(pthread_t) * data->number_of_philo);
-	if (data->philo == NULL)
-		perror("Malloc Error");
-	while (data->i < data->number_of_philo)
+	data->start = get_time();
+	data->stop = 0;
+
+	data->forks = malloc(sizeof(pthread_mutex_t) * data->number_of_philo);
+	data->philo = malloc(sizeof(t_philos) * data->number_of_philo);
+	i = 0;
+	while (i < data->number_of_philo)
 	{
-		data->id = malloc(sizeof(int) * data->number_of_philo);
-        *data->id = data->i;
-		if (pthread_create(&data->philo[data->i++], NULL, thread_function, data) != 0)
-		{
-			perror("Error Creating Thread");
-			return ;
-		}
+		data->philo[i].id = i + 1;
+		data->philo[i].data = data;
+		data->philo[i].last_eat = data->start;
+		pthread_mutex_init(&data->philo[i].m_last_eat, NULL);
+		pthread_mutex_init(&data->forks[i], NULL);
+		i++;
+	}
+	init_fork(data);
+	i = 0;
+	while (i < data->number_of_philo)
+	{
+		pthread_create(&data->philo[i].thread, NULL, thread_function, &data->philo[i]);
+		i++;
 	}
 }
 
@@ -73,7 +78,7 @@ int	init_checker_thread(t_philo_data *data)
 		philo_free(data);
 		return (1);
 	}
-	if (pthread_create(&data->dead_checker, NULL, check_dead, data) != 0)
+	if (pthread_create(&data->dead_checker, NULL, check_dead, &data->philo) != 0)
 	{
 		printf("Error While creating checker thread\n");
 		philo_free(data);

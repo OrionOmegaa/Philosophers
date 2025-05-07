@@ -12,8 +12,10 @@
 
 #include "../includes/philosophers.h"
 
-int	message(t_philo_data *data, char *msg, int dead)
+int	message(t_philos *philo, char *msg, int dead)
 {
+	t_philo_data *data = philo->data;
+
 	pthread_mutex_lock(&data->print);
 	pthread_mutex_lock(&data->m_stop);
 	if (data->stop)
@@ -23,7 +25,7 @@ int	message(t_philo_data *data, char *msg, int dead)
 		return (1);
 	}
 	pthread_mutex_unlock(&data->m_stop);
-	printf(msg, get_time() - data->start, data->id + 1);
+	printf(msg, get_time() - data->start, philo->id);
 	if (dead)
 	{
 		death(data);
@@ -36,16 +38,16 @@ int	message(t_philo_data *data, char *msg, int dead)
 
 int	fork_choice(t_philo_data *data)
 {
-	if (pthread_mutex_lock(data->fork_right) != 0)
+	if (pthread_mutex_lock(data->philo[data->i].fork_right) != 0)
 		return (1);
-	message(data, FORK, 0);
-	if (data->fork_left == data->fork_right
-		|| pthread_mutex_lock(data->fork_left) != 0)
+	message(&data->philo[data->i], FORK, 0);
+	if (data->philo[data->i].fork_left == data->philo[data->i].fork_right
+		|| pthread_mutex_lock(data->philo[data->i].fork_left) != 0)
 	{
-		pthread_mutex_unlock(data->fork_right);
+		pthread_mutex_unlock(data->philo[data->i].fork_right);
 		return (1);
 	}
-	message(data, FORK, 0);
+	message(&data->philo[data->i], FORK, 0);
 	return (0);
 }
 
@@ -53,18 +55,18 @@ int	forks(t_philo_data *data)
 {
 	if (fork_choice(data))
 		return (1);
-	message(data, EAT, 0);
-	pthread_mutex_lock(&data->m_last_eat);
-	data->last_eat = get_time();
-	pthread_mutex_unlock(&data->m_last_eat);
+	message(&data->philo[data->i], EAT, 0);
+	pthread_mutex_lock(&data->philo[data->i].m_last_eat);
+	data->philo[data->i].last_eat = get_time();
+	pthread_mutex_unlock(&data->philo[data->i].m_last_eat);
 	if (ft_usleep(data->time_to_eat, data))
 	{
-		pthread_mutex_unlock(data->fork_left);
-		pthread_mutex_unlock(data->fork_right);
+		pthread_mutex_unlock(data->philo[data->i].fork_left);
+		pthread_mutex_unlock(data->philo[data->i].fork_right);
 		return (1);
 	}
-	pthread_mutex_unlock(data->fork_left);
-	pthread_mutex_unlock(data->fork_right);
+	pthread_mutex_unlock(data->philo[data->i].fork_left);
+	pthread_mutex_unlock(data->philo[data->i].fork_right);
 	return (0);
 }
 
@@ -77,7 +79,7 @@ void	philo_free(t_philo_data *data)
 	{
 		pthread_mutex_destroy(&data->forks[i]);
 		pthread_mutex_destroy(&data->m_eat_count);
-		pthread_mutex_destroy(&data->m_last_eat);
+		pthread_mutex_destroy(&data->philo[data->i].m_last_eat);
 		pthread_mutex_destroy(&data->m_stop);
 		i++;
 	}

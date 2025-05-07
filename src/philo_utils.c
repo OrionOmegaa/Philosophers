@@ -99,14 +99,14 @@ int	ft_usleep(long long time, t_philo_data *data)
 	tmp = get_time();
 	while (tmp < wait)
 	{
-		pthread_mutex_lock(&data->m_last_eat);
-		if (tmp - data->last_eat - data->time_to_die > 0)
+		pthread_mutex_lock(&data->philo[data->i].m_last_eat);
+		if (tmp - data->philo[data->i].last_eat - data->time_to_die > 0)
 		{
-			pthread_mutex_unlock(&data->m_last_eat);
-			message(data, DEAD, 1);
+			pthread_mutex_unlock(&data->philo[data->i].m_last_eat);
+			message(&data->philo[data->i], DEAD, 1);
 			return (1);
 		}
-		pthread_mutex_unlock(&data->m_last_eat);
+		pthread_mutex_unlock(&data->philo[data->i].m_last_eat);
 		pthread_mutex_lock(&data->m_stop);
 		if (data->stop)
 			return (pthread_mutex_unlock(&data->m_stop) + 1);
