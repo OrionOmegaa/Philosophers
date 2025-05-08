@@ -79,7 +79,7 @@ void	philo_free(t_philo_data *data)
 	{
 		pthread_mutex_destroy(&data->forks[i]);
 		pthread_mutex_destroy(&data->m_eat_count);
-		pthread_mutex_destroy(&data->philo[data->i].m_last_eat);
+		pthread_mutex_destroy(&data->philo[i].m_last_eat);
 		pthread_mutex_destroy(&data->m_stop);
 		i++;
 	}

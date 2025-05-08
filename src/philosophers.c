@@ -68,11 +68,10 @@ void* check_thread(void* argv)
 
 void* check_dead(void* argv)
 {
-	t_philos *philo = (t_philos *)argv;
+	t_philo_data *data = (t_philo_data *)argv;
+	int	i;
 	
-	t_philo_data *data = philo->data;
-	static int	i = -1;
-
+	i = -1;
 	while (1 && (usleep(100) || 1))
 	{
 		if (++i >= data->number_of_philo)
@@ -80,13 +79,13 @@ void* check_dead(void* argv)
 		pthread_mutex_lock(&data->philo[i].m_last_eat);
 		if (get_time() - data->philo[i].last_eat > data->time_to_die)
 		{
-			message(philo, DEAD, 1);
+			message(&data->philo[i], DEAD, 1);
 			pthread_mutex_unlock(&data->philo[i].m_last_eat);
 			break ;
 		}
 		pthread_mutex_unlock(&data->philo[i].m_last_eat);
 		pthread_mutex_lock(&data->m_stop);
-		if (data->stop)
+		if (&data->stop)
 		{
 			pthread_mutex_unlock(&data->m_stop);
 			return (NULL);
