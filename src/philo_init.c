@@ -19,7 +19,7 @@ void init_fork(t_philo_data *data)
     i = 0;
     while (i < data->number_of_philo)
     {
-        if (data->i % 2 == 0)
+        if (i % 2 == 0)
         {
             data->philo[i].fork_left = &data->forks[(i + 1) % data->number_of_philo];
             data->philo[i].fork_right = &data->forks[i];
@@ -75,6 +75,7 @@ void	init_philo(int argc, char **argv, t_philo_data *data)
 	while (i < data->number_of_philo)
 	{
 		pthread_create(&data->philo[i].thread, NULL, thread_function, &data->philo[i]);
+		usleep(10);
 		i++;
 	}
 }

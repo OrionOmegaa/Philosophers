@@ -36,37 +36,37 @@ int	message(t_philos *philo, char *msg, int dead)
 	return (0);
 }
 
-int	fork_choice(t_philo_data *data)
+int	fork_choice(t_philos *philo)
 {
-	if (pthread_mutex_lock(data->philo[data->i].fork_right) != 0)
+	if (pthread_mutex_lock(philo->fork_right) != 0)
 		return (1);
-	message(&data->philo[data->i], FORK, 0);
-	if (data->philo[data->i].fork_left == data->philo[data->i].fork_right
-		|| pthread_mutex_lock(data->philo[data->i].fork_left) != 0)
+	message(philo, FORK, 0);
+	if (philo->fork_left == philo->fork_right
+		|| pthread_mutex_lock(philo->fork_left) != 0)
 	{
-		pthread_mutex_unlock(data->philo[data->i].fork_right);
+		pthread_mutex_unlock(philo->fork_right);
 		return (1);
 	}
-	message(&data->philo[data->i], FORK, 0);
+	message(philo, FORK, 0);
 	return (0);
 }
 
-int	forks(t_philo_data *data)
+int	forks(t_philos *philo)
 {
-	if (fork_choice(data))
+	if (fork_choice(philo))
 		return (1);
-	message(&data->philo[data->i], EAT, 0);
-	pthread_mutex_lock(&data->philo[data->i].m_last_eat);
-	data->philo[data->i].last_eat = get_time();
-	pthread_mutex_unlock(&data->philo[data->i].m_last_eat);
-	if (ft_usleep(data->time_to_eat, data))
+	message(philo, EAT, 0);
+	pthread_mutex_lock(&philo->m_last_eat);
+	philo->last_eat = get_time();
+	pthread_mutex_unlock(&philo->m_last_eat);
+	if (ft_usleep(philo->data->time_to_eat, philo->data))
 	{
-		pthread_mutex_unlock(data->philo[data->i].fork_left);
-		pthread_mutex_unlock(data->philo[data->i].fork_right);
+		pthread_mutex_unlock(philo->fork_left);
+		pthread_mutex_unlock(philo->fork_right);
 		return (1);
 	}
-	pthread_mutex_unlock(data->philo[data->i].fork_left);
-	pthread_mutex_unlock(data->philo[data->i].fork_right);
+	pthread_mutex_unlock(philo->fork_left);
+	pthread_mutex_unlock(philo->fork_right);
 	return (0);
 }
 

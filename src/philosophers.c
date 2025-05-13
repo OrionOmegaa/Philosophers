@@ -24,7 +24,7 @@ void* thread_function(void* argv)
         message(philo, THINK, 0);
 		if (philo->id % 2 == 0)
 			usleep(150);
-		if (forks(data))
+		if (forks(philo))
 			return (NULL);
 		pthread_mutex_lock(&data->m_number_of_times);
 		data->number_of_times++;
@@ -70,6 +70,35 @@ void* check_dead(void* argv)
 {
 	t_philo_data *data = (t_philo_data *)argv;
 	int	i;
+
+	while (1)
+	{
+		i = 0;
+		while (i < data->number_of_philo)
+		{
+			pthread_mutex_lock(&data->philo[i].m_last_eat);
+			long long time_since = get_time() - data->philo[i].last_eat;
+			pthread_mutex_unlock(&data->philo[i].m_last_eat);
+
+			pthread_mutex_lock(&data->m_stop);
+			if (!data->stop && time_since > data->time_to_die)
+			{
+				pthread_mutex_unlock(&data->m_stop);
+				message(&data->philo[i], DEAD, 1);
+				return death(data);
+			}
+			pthread_mutex_unlock(&data->m_stop);
+			i++;
+		}
+		usleep(500);
+	}
+	return NULL;
+}
+
+void* check_dead2(void* argv)
+{
+	t_philo_data *data = (t_philo_data *)argv;
+	int	i;
 	
 	i = -1;
 	while (1 && (usleep(100) || 1))
@@ -79,13 +108,13 @@ void* check_dead(void* argv)
 		pthread_mutex_lock(&data->philo[i].m_last_eat);
 		if (get_time() - data->philo[i].last_eat > data->time_to_die)
 		{
-			message(&data->philo[i], DEAD, 1);
 			pthread_mutex_unlock(&data->philo[i].m_last_eat);
-			break ;
+			message(&data->philo[i], DEAD, 1);
+			return (death(data));
 		}
 		pthread_mutex_unlock(&data->philo[i].m_last_eat);
 		pthread_mutex_lock(&data->m_stop);
-		if (&data->stop)
+		if (data->stop)
 		{
 			pthread_mutex_unlock(&data->m_stop);
 			return (NULL);

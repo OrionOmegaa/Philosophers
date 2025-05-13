@@ -75,7 +75,7 @@ typedef struct s_philo_data
 int			ft_atoi(const char *str);
 int			check_args(char **argv);
 int			ft_usleep(long long time, t_philo_data *data);
-int			forks(t_philo_data *data);
+int			forks(t_philos *philo);
 int			message(t_philos *philo, char *msg, int dead);
 int			init_checker_thread(t_philo_data *data);
 void		init_philo(int argc, char **argv, t_philo_data *data);
