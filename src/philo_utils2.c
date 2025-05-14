@@ -15,12 +15,34 @@
 int	message(t_philos *philo, char *msg, int dead)
 {
 	t_philo_data *data = philo->data;
+	long timestamp;
 
-	pthread_mutex_lock(&data->print);
+	pthread_mutex_lock(&data->message);
+	pthread_mutex_lock(&data->m_stop);
+	if (data->stop && !dead)
+	{
+		pthread_mutex_unlock(&data->m_stop);
+		pthread_mutex_unlock(&data->message);
+		return (1);
+	}
+	timestamp = get_time() - data->start;
+	if (dead)
+		data->stop = 1;
+	pthread_mutex_unlock(&data->m_stop);
+	printf(msg, timestamp, philo->id);
+	pthread_mutex_unlock(&data->message);
+	return (0);
+}
+
+int	message2(t_philos *philo, char *msg, int dead)
+{
+	t_philo_data *data = philo->data;
+
+	pthread_mutex_lock(&data->message);
 	pthread_mutex_lock(&data->m_stop);
 	if (data->stop)
 	{
-		pthread_mutex_unlock(&data->print);
+		pthread_mutex_unlock(&data->message);
 		pthread_mutex_unlock(&data->m_stop);
 		return (1);
 	}
@@ -29,10 +51,10 @@ int	message(t_philos *philo, char *msg, int dead)
 	if (dead)
 	{
 		death(data);
-		pthread_mutex_unlock(&data->print);
+		pthread_mutex_unlock(&data->message);
 		return (1);
 	}
-	pthread_mutex_unlock(&data->print);
+	pthread_mutex_unlock(&data->message);
 	return (0);
 }
 

@@ -67,6 +67,7 @@ typedef struct s_philo_data
 	pthread_mutex_t		m_stop;
 	pthread_mutex_t		m_eat_count;
 	pthread_mutex_t		print;
+	pthread_mutex_t		message;
 	long long			start;
 }		t_philo_data;
 

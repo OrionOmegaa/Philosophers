@@ -39,6 +39,7 @@ void	init_mutex(t_philo_data *data)
 
 	i = 0;
 	pthread_mutex_init(&data->m_stop, NULL);
+	pthread_mutex_init(&data->message, NULL);
 	pthread_mutex_init(&data->print, NULL);
 	pthread_mutex_init(&data->m_eat_count, NULL);
 	pthread_mutex_init(&data->m_number_of_times, NULL);

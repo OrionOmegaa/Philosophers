@@ -69,22 +69,13 @@ long long	get_time(void)
 	return ((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
 }
 
-void *death2(t_philo_data *data)
-{
-	pthread_mutex_lock(&data->m_stop);
-	if (data->stop == 0)
-		data->stop = 1;
-	pthread_mutex_unlock(&data->m_stop);
-	return (NULL);
-}
-
 void	*death(t_philo_data *data)
 {
 	int	i;
 
 	i = -1;
 	pthread_mutex_lock(&data->m_stop);
-	if (&data->stop)
+	if (!data->stop)
 	{
 		pthread_mutex_unlock(&data->m_stop);
 		return (NULL);
