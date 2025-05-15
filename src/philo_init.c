@@ -38,13 +38,13 @@ void	init_mutex(t_philo_data *data)
 	int	i;
 
 	i = 0;
-	pthread_mutex_init(&data->m_stop, NULL);
+	pthread_mutex_init(&data->philo[i].m_stop, NULL);
 	pthread_mutex_init(&data->message, NULL);
 	pthread_mutex_init(&data->print, NULL);
-	pthread_mutex_init(&data->m_eat_count, NULL);
-	pthread_mutex_init(&data->m_number_of_times, NULL);
+	pthread_mutex_init(&data->philo[i].m_eat_count, NULL);
 	while (i < data->number_of_philo)
 	{
+		data->philo[i].stop = 0;
 		data->philo[i].id = i + 1;
 		data->philo[i].data = data;
 		data->philo[i].last_eat = data->start;
@@ -68,7 +68,6 @@ void	init_philo(int argc, char **argv, t_philo_data *data)
 	else
 		data->number_of_times = -1;
 	data->start = get_time();
-	data->stop = 0;
 	data->forks = malloc(sizeof(pthread_mutex_t) * data->number_of_philo);
 	data->philo = malloc(sizeof(t_philos) * data->number_of_philo);
 	init_mutex(data);
@@ -83,7 +82,7 @@ void	init_philo(int argc, char **argv, t_philo_data *data)
 
 int	init_checker_thread(t_philo_data *data)
 {
-	if (data->must_eat != -1 && pthread_create(&data->checker, NULL,
+	if (data->number_of_times != -1 && pthread_create(&data->checker, NULL,
 			check_thread, data) != 0)
 	{
 		printf("Error While creating checker thread\n");

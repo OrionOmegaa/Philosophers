@@ -41,15 +41,21 @@ int	ft_atoi(const char *str)
 
 int	check_args(char **argv)
 {
-	int	i;
-	int	j;
+	int			i;
+	int			j;
+	long long	num;
 
 	j = 1;
 	while (argv[j] != NULL)
 	{
 		i = 0;
-		if (argv[j][i] == '\0')
+		num = ft_atoll(argv[j]);
+		if (num > INT_MAX)
 			return (1);
+		if (argv[j][0] == '0')
+		return (1);
+		if (argv[j][i] == '\0')
+		return (1);
 		while (argv[j][i] != '\0')
 		{
 			if (argv[j][i] > '9' || argv[j][i] < '0')
@@ -74,23 +80,23 @@ void	*death(t_philo_data *data)
 	int	i;
 
 	i = -1;
-	pthread_mutex_lock(&data->m_stop);
-	if (!data->stop)
+	pthread_mutex_lock(&data->philo[0].m_stop);
+	if (data->philo[0].stop)
 	{
-		pthread_mutex_unlock(&data->m_stop);
+		pthread_mutex_unlock(&data->philo[0].m_stop);
 		return (NULL);
 	}
-	pthread_mutex_unlock(&data->m_stop);
+	pthread_mutex_unlock(&data->philo[0].m_stop);
 	while (++i < data->number_of_philo)
 	{
-		pthread_mutex_lock(&data->m_stop);
-		data->stop = 1;
-		pthread_mutex_unlock(&data->m_stop);
+		pthread_mutex_lock(&data->philo[i].m_stop);
+		data->philo[i].stop = 1;
+		pthread_mutex_unlock(&data->philo[i].m_stop);
 	}
 	return (NULL);
 }
 
-int	ft_usleep(long long time, t_philo_data *data)
+int	ft_usleep(long long time, t_philos *philo)
 {
 	long long	wait;
 	long long	tmp;
@@ -99,18 +105,18 @@ int	ft_usleep(long long time, t_philo_data *data)
 	tmp = get_time();
 	while (tmp < wait)
 	{
-		pthread_mutex_lock(&data->philo[data->i].m_last_eat);
-		if (tmp - data->philo[data->i].last_eat - data->time_to_die > 0)
+		pthread_mutex_lock(&philo->m_last_eat);
+		if (tmp - philo->last_eat - philo->data->time_to_die > 0)
 		{
-			pthread_mutex_unlock(&data->philo[data->i].m_last_eat);
-			message(&data->philo[data->i], DEAD, 1);
+			pthread_mutex_unlock(&philo->m_last_eat);
+			message(philo, DEAD, 1);
 			return (1);
 		}
-		pthread_mutex_unlock(&data->philo[data->i].m_last_eat);
-		pthread_mutex_lock(&data->m_stop);
-		if (data->stop)
-			return (pthread_mutex_unlock(&data->m_stop) + 1);
-		pthread_mutex_unlock(&data->m_stop);
+		pthread_mutex_unlock(&philo->m_last_eat);
+		pthread_mutex_lock(&philo->m_stop);
+		if (philo->stop)
+			return (pthread_mutex_unlock(&philo->m_stop) + 1);
+		pthread_mutex_unlock(&philo->m_stop);
 		usleep(1000);
 		tmp = get_time();
 	}

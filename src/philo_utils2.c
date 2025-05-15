@@ -12,41 +12,44 @@
 
 #include "../includes/philosophers.h"
 
+long long	ft_atoll(const char *str)
+{
+	long long	result;
+	int			sign;
+	int			i;
+
+	i = 0;
+	result = 0;
+	sign = 1;
+	while (str[i] == ' ' || (str[i] >= 9 && str[i] <= 13))
+		i++;
+	if (str[i] == '-' || str[i] == '+')
+	{
+		if (str[i] == '-')
+			sign = -1;
+		i++;
+	}
+	while (str[i] >= '0' && str[i] <= '9')
+	{
+		result = result * 10 + (str[i] - '0');
+		i++;
+	}
+	return (result * sign);
+}
+
 int	message(t_philos *philo, char *msg, int dead)
 {
 	t_philo_data *data = philo->data;
-	long timestamp;
 
 	pthread_mutex_lock(&data->message);
-	pthread_mutex_lock(&data->m_stop);
-	if (data->stop && !dead)
-	{
-		pthread_mutex_unlock(&data->m_stop);
-		pthread_mutex_unlock(&data->message);
-		return (1);
-	}
-	timestamp = get_time() - data->start;
-	if (dead)
-		data->stop = 1;
-	pthread_mutex_unlock(&data->m_stop);
-	printf(msg, timestamp, philo->id);
-	pthread_mutex_unlock(&data->message);
-	return (0);
-}
-
-int	message2(t_philos *philo, char *msg, int dead)
-{
-	t_philo_data *data = philo->data;
-
-	pthread_mutex_lock(&data->message);
-	pthread_mutex_lock(&data->m_stop);
-	if (data->stop)
+	pthread_mutex_lock(&philo->m_stop);
+	if (philo->stop)
 	{
 		pthread_mutex_unlock(&data->message);
-		pthread_mutex_unlock(&data->m_stop);
+		pthread_mutex_unlock(&philo->m_stop);
 		return (1);
 	}
-	pthread_mutex_unlock(&data->m_stop);
+	pthread_mutex_unlock(&philo->m_stop);
 	printf(msg, get_time() - data->start, philo->id);
 	if (dead)
 	{
@@ -81,7 +84,7 @@ int	forks(t_philos *philo)
 	pthread_mutex_lock(&philo->m_last_eat);
 	philo->last_eat = get_time();
 	pthread_mutex_unlock(&philo->m_last_eat);
-	if (ft_usleep(philo->data->time_to_eat, philo->data))
+	if (ft_usleep(philo->data->time_to_eat, philo))
 	{
 		pthread_mutex_unlock(philo->fork_left);
 		pthread_mutex_unlock(philo->fork_right);
@@ -100,9 +103,9 @@ void	philo_free(t_philo_data *data)
 	while (i < data->number_of_philo && data->forks)
 	{
 		pthread_mutex_destroy(&data->forks[i]);
-		pthread_mutex_destroy(&data->m_eat_count);
+		pthread_mutex_destroy(&data->philo[i].m_eat_count);
 		pthread_mutex_destroy(&data->philo[i].m_last_eat);
-		pthread_mutex_destroy(&data->m_stop);
+		pthread_mutex_destroy(&data->philo[i].m_stop);
 		i++;
 	}
 	i = 0;

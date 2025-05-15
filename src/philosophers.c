@@ -17,24 +17,24 @@ void* thread_function(void* argv)
 	t_philos *philo = (t_philos *)argv;
 	
 	t_philo_data *data = philo->data;
-	pthread_mutex_lock(&data->m_stop);
-    while (!data->stop)
+	pthread_mutex_lock(&philo->m_stop);
+    while (!philo->stop)
 	{
-		pthread_mutex_unlock(&data->m_stop);
+		pthread_mutex_unlock(&philo->m_stop);
         message(philo, THINK, 0);
 		if (philo->id % 2 == 0)
 			usleep(150);
 		if (forks(philo))
 			return (NULL);
-		pthread_mutex_lock(&data->m_number_of_times);
-		data->number_of_times++;
-		pthread_mutex_unlock(&data->m_number_of_times);
+		pthread_mutex_lock(&philo->m_eat_count);
+		philo->eat_count++;
+		pthread_mutex_unlock(&philo->m_eat_count);
 		message(philo, SLEEP, 0);
-		if (ft_usleep(data->time_to_sleep, data))
+		if (ft_usleep(data->time_to_sleep, philo))
 			return (NULL);
-		pthread_mutex_lock(&data->m_stop);
+		pthread_mutex_lock(&philo->m_stop);
 	}
-	pthread_mutex_unlock(&data->m_stop);
+	pthread_mutex_unlock(&philo->m_stop);
     return NULL;
 }
 void* check_thread(void* argv)
@@ -50,58 +50,23 @@ void* check_thread(void* argv)
 		i = -1;
 		while (++i < data->number_of_philo)
 		{
-			pthread_mutex_lock(&data->m_eat_count);
-			if (data->eat_count < data->must_eat)
+			pthread_mutex_lock(&data->philo[i].m_eat_count);
+			if (data->philo[i].eat_count < data->number_of_times)
 				all_philos_ate = 0;
-			pthread_mutex_unlock(&data->m_eat_count);
-			pthread_mutex_lock(&data->m_stop);
-			if (data->stop
-				&& pthread_mutex_unlock(&data->m_stop) == 0)
+			pthread_mutex_unlock(&data->philo[i].m_eat_count);
+			pthread_mutex_lock(&data->philo[i].m_stop);
+			if (data->philo[i].stop
+				&& pthread_mutex_unlock(&data->philo[i].m_stop) == 0)
 				return (NULL);
-			pthread_mutex_unlock(&data->m_stop);
+			pthread_mutex_unlock(&data->philo[i].m_stop);
 		}
 		if (all_philos_ate)
 			return (death(data));
 	}
 	return (NULL);
 }
+
 void* check_dead(void* argv)
-{
-	t_philo_data *data = (t_philo_data *)argv;
-	int	i = 0;
-
-	while (1)
-	{
-		if (i >= data->number_of_philo)
-			i = 0;
-		pthread_mutex_lock(&data->philo[i].m_last_eat);
-		long time_since_last_meal = get_time() - data->philo[i].last_eat;
-		pthread_mutex_unlock(&data->philo[i].m_last_eat);
-
-		pthread_mutex_lock(&data->m_stop);
-		if (data->stop)
-		{
-			pthread_mutex_unlock(&data->m_stop);
-			return NULL;
-		}
-		if (time_since_last_meal > data->time_to_die)
-		{
-			data->stop = 1;
-			pthread_mutex_lock(&data->print);
-			message(&data->philo[i], DEAD, 1);
-			pthread_mutex_unlock(&data->print);
-
-			pthread_mutex_unlock(&data->m_stop);
-			return death(data);
-		}
-		pthread_mutex_unlock(&data->m_stop);
-
-		usleep(100);
-		i++;
-	}
-}
-
-void* check_dead2(void* argv)
 {
 	t_philo_data *data = (t_philo_data *)argv;
 	int	i;
@@ -119,13 +84,13 @@ void* check_dead2(void* argv)
 			return (death(data));
 		}
 		pthread_mutex_unlock(&data->philo[i].m_last_eat);
-		pthread_mutex_lock(&data->m_stop);
-		if (data->stop)
+		pthread_mutex_lock(&data->philo[i].m_stop);
+		if (data->philo[i].stop)
 		{
-			pthread_mutex_unlock(&data->m_stop);
+			pthread_mutex_unlock(&data->philo[i].m_stop);
 			return (NULL);
 		}
-		pthread_mutex_unlock(&data->m_stop);
+		pthread_mutex_unlock(&data->philo[i].m_stop);
 	}
 	return (death(data));
 }
@@ -145,6 +110,8 @@ int	main(int argc, char **argv)
 	init_checker_thread(&data);
 	while (++i < data.number_of_philo)
 		pthread_join(data.philo[i].thread, NULL);
+	if (data.number_of_times > 0)
+		pthread_join(data.checker, NULL);
 	pthread_join(data.dead_checker, NULL);
 	philo_free(&data);
 	return (0);
