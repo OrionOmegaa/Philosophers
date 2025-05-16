@@ -44,6 +44,7 @@ void	init_mutex(t_philo_data *data)
 	pthread_mutex_init(&data->philo[i].m_eat_count, NULL);
 	while (i < data->number_of_philo)
 	{
+		data->philo[i].eat_count = 0;
 		data->philo[i].stop = 0;
 		data->philo[i].id = i + 1;
 		data->philo[i].data = data;

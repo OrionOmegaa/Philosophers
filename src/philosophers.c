@@ -37,6 +37,7 @@ void* thread_function(void* argv)
 	pthread_mutex_unlock(&philo->m_stop);
     return NULL;
 }
+
 void* check_thread(void* argv)
 {
 	t_philo_data *data;
