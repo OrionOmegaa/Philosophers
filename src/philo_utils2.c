@@ -109,7 +109,7 @@ void	philo_free(t_philo_data *data)
 		i++;
 	}
 	i = 0;
+	pthread_mutex_destroy(&data->print);
 	free(data->forks);
 	free(data->philo);
-	pthread_mutex_destroy(&data->print);
 }

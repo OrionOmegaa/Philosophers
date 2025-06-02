@@ -2,7 +2,7 @@
 
 #Flags
 
-CFLAGS=-Wall -Wextra -Werror -fsanitize=address -g3
+CFLAGS=-Wall -Wextra -Werror -g3 -fsanitize=thread
 
 #Files
 

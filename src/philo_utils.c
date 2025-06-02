@@ -93,6 +93,7 @@ void	*death(t_philo_data *data)
 		data->philo[i].stop = 1;
 		pthread_mutex_unlock(&data->philo[i].m_stop);
 	}
+	
 	return (NULL);
 }
 

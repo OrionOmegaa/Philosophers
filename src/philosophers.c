@@ -23,7 +23,7 @@ void* thread_function(void* argv)
 		pthread_mutex_unlock(&philo->m_stop);
         message(philo, THINK, 0);
 		if (philo->id % 2 == 0)
-			usleep(150);
+			usleep(100);
 		if (forks(philo))
 			return (NULL);
 		pthread_mutex_lock(&philo->m_eat_count);

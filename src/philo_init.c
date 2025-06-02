@@ -12,6 +12,22 @@
 
 #include "../includes/philosophers.h"
 
+void	*ft_calloc(size_t nmemb, size_t size)
+{
+	void	*s;
+	size_t	i;
+
+	if (size && nmemb > (size_t)-1 / size)
+		return (NULL);
+	s = (void *)malloc(size * nmemb);
+	if (!s)
+		return (NULL);
+	i = 0;
+	while (i < nmemb * size)
+		((char *)s)[i++] = 0;
+	return (s);
+}
+
 void init_fork(t_philo_data *data)
 {
 	int	i;
@@ -69,8 +85,8 @@ void	init_philo(int argc, char **argv, t_philo_data *data)
 	else
 		data->number_of_times = -1;
 	data->start = get_time();
-	data->forks = malloc(sizeof(pthread_mutex_t) * data->number_of_philo);
-	data->philo = malloc(sizeof(t_philos) * data->number_of_philo);
+	data->forks = ft_calloc(sizeof(pthread_mutex_t), data->number_of_philo);
+	data->philo = ft_calloc(sizeof(t_philos), data->number_of_philo);
 	init_mutex(data);
 	init_fork(data);
 	while (i < data->number_of_philo)
