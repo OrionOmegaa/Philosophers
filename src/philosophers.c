@@ -78,7 +78,7 @@ void* check_dead(void* argv)
 		if (++i >= data->number_of_philo)
 			i = 0;
 		pthread_mutex_lock(&data->philo[i].m_last_eat);
-		if (get_time() - data->philo[i].last_eat > data->time_to_die)
+		if (get_time() - data->philo[i].last_eat > data->time_to_die + 1)
 		{
 			pthread_mutex_unlock(&data->philo[i].m_last_eat);
 			message(&data->philo[i], DEAD, 1);

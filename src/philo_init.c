@@ -92,7 +92,7 @@ void	init_philo(int argc, char **argv, t_philo_data *data)
 	while (i < data->number_of_philo)
 	{
 		pthread_create(&data->philo[i].thread, NULL, thread_function, &data->philo[i]);
-		usleep(10);
+		usleep(100);
 		i++;
 	}
 }
